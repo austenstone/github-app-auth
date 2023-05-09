@@ -9,8 +9,7 @@ const app = new App({
     privateKey: PRIVATE_KEY.replace(/\\n/g, '\n'),
 });
 
-// Now we are authenticated as the app, but we need to authenticate as an installation
-
+// Get the installation ID
 let INSTALLATION_ID = process.env.GITHUB_INSTALLATION_ID;
 if (!INSTALLATION_ID) {
     const res = await app.octokit.request("/app/installations")
@@ -18,16 +17,17 @@ if (!INSTALLATION_ID) {
 }
 console.log('INSTALLATION_ID', INSTALLATION_ID)
 
+// Authenticate as installation
 const octokit = await app.getInstallationOctokit(INSTALLATION_ID);
 
-const res = await octokit.graphql(`
-  query {
-    viewer {
-      login
-    }
+const login = await octokit.graphql(`
+query {
+  viewer {
+    login
   }
+}
 `)
-console.log(res);
+console.log(login);
 
 const meta = await octokit.request("GET /meta")
 console.log(meta.data);
